@@ -1,0 +1,9 @@
+{
+  "id": "session_01_cut_beginning",
+  "title": "Trim first 5 seconds",
+  "commands": [
+    "Cut the first 5 seconds."
+  ],
+  "expected_final_duration": 25.0,
+  "expected_status": "APPLIED"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "session_07_add_caption",
+  "title": "Add caption at beginning",
+  "commands": [
+    "Add a caption saying Dance Practice at the beginning."
+  ],
+  "expected_status": "APPLIED"
+}

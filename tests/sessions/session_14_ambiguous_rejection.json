@@ -1,0 +1,8 @@
+{
+  "id": "session_14_ambiguous_rejection",
+  "title": "Reject ungrounded section reference safely",
+  "commands": [
+    "Remove the pricing section."
+  ],
+  "expected_status": "REJECTED"
+}

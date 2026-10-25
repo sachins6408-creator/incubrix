@@ -1,0 +1,10 @@
+{
+  "id": "session_13_restore_intro",
+  "title": "Restore removed intro region",
+  "commands": [
+    "Cut the first 5 seconds.",
+    "Restore the intro."
+  ],
+  "expected_final_duration": 30.0,
+  "expected_status": "APPLIED"
+}

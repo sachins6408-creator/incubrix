@@ -1,0 +1,8 @@
+{
+  "id": "session_15_invalid_bounds_rejection",
+  "title": "Reject out of bounds cut without state corruption",
+  "commands": [
+    "Cut from 50 to 60 seconds."
+  ],
+  "expected_status": "REJECTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "session_08_change_caption_color",
+  "title": "Change caption color to red",
+  "commands": [
+    "Add a caption saying Dance Practice at the beginning.",
+    "Change the caption color to red."
+  ],
+  "expected_status": "APPLIED"
+}

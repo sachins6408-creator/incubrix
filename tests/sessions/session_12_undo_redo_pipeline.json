@@ -1,0 +1,11 @@
+{
+  "id": "session_12_undo_redo_pipeline",
+  "title": "Undo and Redo pipeline test",
+  "commands": [
+    "Cut the first 5 seconds.",
+    "Undo the last edit.",
+    "Redo the edit."
+  ],
+  "expected_final_duration": 25.0,
+  "expected_status": "APPLIED"
+}

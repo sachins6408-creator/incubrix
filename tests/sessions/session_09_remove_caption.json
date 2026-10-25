@@ -1,0 +1,9 @@
+{
+  "id": "session_09_remove_caption",
+  "title": "Remove existing caption",
+  "commands": [
+    "Add a caption saying Dance Practice at the beginning.",
+    "Remove the caption at the beginning."
+  ],
+  "expected_status": "APPLIED"
+}

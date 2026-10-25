@@ -1,0 +1,9 @@
+{
+  "id": "session_05_slow_down",
+  "title": "Slow down video to half speed",
+  "commands": [
+    "Slow down the video to half speed."
+  ],
+  "expected_final_duration": 60.0,
+  "expected_status": "APPLIED"
+}

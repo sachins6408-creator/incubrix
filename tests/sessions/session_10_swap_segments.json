@@ -1,0 +1,9 @@
+{
+  "id": "session_10_swap_segments",
+  "title": "Cut middle and swap resulting segments",
+  "commands": [
+    "Cut from 10 to 15 seconds.",
+    "Swap the first and second segments."
+  ],
+  "expected_status": "APPLIED"
+}

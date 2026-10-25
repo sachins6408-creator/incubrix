@@ -1,0 +1,9 @@
+{
+  "id": "session_03_cut_middle",
+  "title": "Cut range 10s to 15s",
+  "commands": [
+    "Cut from 10 to 15 seconds."
+  ],
+  "expected_final_segments": 2,
+  "expected_status": "APPLIED"
+}

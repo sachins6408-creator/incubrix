@@ -1,0 +1,9 @@
+{
+  "id": "session_02_cut_end",
+  "title": "Remove last 3 seconds",
+  "commands": [
+    "Remove the last 3 seconds."
+  ],
+  "expected_final_duration": 27.0,
+  "expected_status": "APPLIED"
+}

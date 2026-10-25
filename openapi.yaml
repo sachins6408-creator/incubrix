@@ -1,0 +1,491 @@
+openapi: 3.1.0
+info:
+  title: IncuBrix
+  description: 'IncuBrix Prompt-Based Video Editing Engine: A complete, functional
+    video editor transforming natural-language instructions into deterministic timeline
+    edits and real FFmpeg rendered videos.'
+  version: 1.0.0
+paths:
+  /health:
+    get:
+      tags:
+      - Health
+      summary: Health Check
+      description: Reports service availability.
+      operationId: health_check_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /ready:
+    get:
+      tags:
+      - Health
+      summary: Readiness Check
+      description: 'Verifies required dependencies: storage paths, database, and FFmpeg/FFprobe
+        binaries.'
+      operationId: readiness_check_ready_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/media/upload:
+    post:
+      tags:
+      - Media
+      summary: Upload Media
+      description: 'Accepts multipart upload of video files (MP4, MOV, etc.),
+
+        validates format with ffprobe, calculates SHA-256 hash, and saves asset record.'
+      operationId: upload_media_api_v1_media_upload_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_upload_media_api_v1_media_upload_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/media/{asset_id}/stream:
+    get:
+      tags:
+      - Media
+      summary: Stream Media
+      description: Streams the uploaded original video with HTTP byte-range requests
+        support (206 Partial Content).
+      operationId: stream_media_api_v1_media__asset_id__stream_get
+      parameters:
+      - name: asset_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Asset Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/media/{asset_id}:
+    get:
+      tags:
+      - Media
+      summary: Get Asset Info
+      description: Returns asset metadata, duration, dimensions, codecs, and hash.
+      operationId: get_asset_info_api_v1_media__asset_id__get
+      parameters:
+      - name: asset_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Asset Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/media:
+    get:
+      tags:
+      - Media
+      summary: List Assets
+      description: Lists all saved media assets.
+      operationId: list_assets_api_v1_media_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/sessions:
+    post:
+      tags:
+      - Sessions
+      summary: Create Session
+      description: 'Creates an editing session strictly bound to a real uploaded asset_id.
+
+        Initializes a full timeline spanning [0, asset.duration].'
+      operationId: create_session_api_v1_sessions_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/sessions/{session_id}:
+    get:
+      tags:
+      - Sessions
+      summary: Get Session
+      operationId: get_session_api_v1_sessions__session_id__get
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/sessions/{session_id}/timeline:
+    get:
+      tags:
+      - Sessions
+      summary: Get Session Timeline
+      operationId: get_session_timeline_api_v1_sessions__session_id__timeline_get
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/sessions/{session_id}/instructions:
+    post:
+      tags:
+      - Sessions
+      summary: Apply Instruction
+      description: 'Unified entry point for both manually typed natural-language instructions
+        and sample prompt buttons.
+
+        Returns strictly APPLIED, NEEDS_CLARIFICATION, or REJECTED.'
+      operationId: apply_instruction_api_v1_sessions__session_id__instructions_post
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstructionRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/sessions/{session_id}/undo:
+    post:
+      tags:
+      - Sessions
+      summary: Undo Edit
+      description: Reverts exactly one successful edit.
+      operationId: undo_edit_api_v1_sessions__session_id__undo_post
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/sessions/{session_id}/redo:
+    post:
+      tags:
+      - Sessions
+      summary: Redo Edit
+      description: Reapplies an undone operation.
+      operationId: redo_edit_api_v1_sessions__session_id__redo_post
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/sessions/{session_id}/render:
+    post:
+      tags:
+      - Sessions
+      summary: Trigger Render
+      description: 'Triggers an asynchronous FFmpeg render job for the current session
+        timeline.
+
+        Returns 202 Accepted with a job_id.'
+      operationId: trigger_render_api_v1_sessions__session_id__render_post
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/sessions/{session_id}/history:
+    get:
+      tags:
+      - Sessions
+      summary: Get History
+      operationId: get_history_api_v1_sessions__session_id__history_get
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/jobs/{job_id}:
+    get:
+      tags:
+      - Render Jobs
+      summary: Get Job Status
+      description: Returns the status (QUEUED, RUNNING, COMPLETED, FAILED), progress,
+        and render manifest of a job.
+      operationId: get_job_status_api_v1_jobs__job_id__get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/jobs/{job_id}/download:
+    get:
+      tags:
+      - Render Jobs
+      summary: Download Rendered Video
+      description: Provides downloadable output only after a render job completes
+        successfully.
+      operationId: download_rendered_video_api_v1_jobs__job_id__download_get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/jobs/{job_id}/stream:
+    get:
+      tags:
+      - Render Jobs
+      summary: Stream Rendered Video
+      description: Streams the completed rendered video for in-browser playback.
+      operationId: stream_rendered_video_api_v1_jobs__job_id__stream_get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    Body_upload_media_api_v1_media_upload_post:
+      properties:
+        file:
+          type: string
+          contentMediaType: application/octet-stream
+          title: File
+      type: object
+      required:
+      - file
+      title: Body_upload_media_api_v1_media_upload_post
+    CreateSessionRequest:
+      properties:
+        asset_id:
+          type: string
+          title: Asset Id
+      type: object
+      required:
+      - asset_id
+      title: CreateSessionRequest
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    InstructionRequest:
+      properties:
+        instruction:
+          type: string
+          title: Instruction
+      type: object
+      required:
+      - instruction
+      title: InstructionRequest
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

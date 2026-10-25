@@ -1,0 +1,9 @@
+{
+  "id": "session_06_speed_range",
+  "title": "Speed up section 5 to 10s by 2x",
+  "commands": [
+    "Speed up the video from 5 to 10 seconds by 2x."
+  ],
+  "expected_final_duration": 27.5,
+  "expected_status": "APPLIED"
+}

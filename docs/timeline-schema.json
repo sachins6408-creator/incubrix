@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IncuBrixCanonicalTimeline",
+  "description": "Deterministic canonical representation of an IncuBrix video editing timeline.",
+  "type": "object",
+  "required": ["asset_id", "total_duration", "segments"],
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "Unique identifier of the source media asset."
+    },
+    "total_duration": {
+      "type": "number",
+      "description": "Calculated total duration of output timeline in seconds."
+    },
+    "segments": {
+      "type": "array",
+      "description": "Ordered sequence of video segments referencing source interval coordinates.",
+      "items": {
+        "type": "object",
+        "required": ["id", "asset_id", "source_start", "source_end", "speed", "captions", "audio_effects"],
+        "properties": {
+          "id": { "type": "string" },
+          "asset_id": { "type": "string" },
+          "source_start": { "type": "number", "minimum": 0 },
+          "source_end": { "type": "number", "minimum": 0 },
+          "speed": { "type": "number", "minimum": 0.1, "maximum": 10.0, "default": 1.0 },
+          "duration": { "type": "number", "minimum": 0 },
+          "label": { "type": ["string", "null"] },
+          "captions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "text", "start_time", "end_time", "color", "font_size", "position"],
+              "properties": {
+                "id": { "type": "string" },
+                "text": { "type": "string" },
+                "start_time": { "type": "number", "minimum": 0 },
+                "end_time": { "type": "number", "minimum": 0 },
+                "color": { "type": "string" },
+                "font_size": { "type": "integer" },
+                "position": { "type": "string", "enum": ["top", "center", "bottom"] }
+              }
+            }
+          },
+          "audio_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["effect_type", "start_time", "end_time", "params"],
+              "properties": {
+                "effect_type": { "type": "string", "enum": ["mute", "bleep", "volume"] },
+                "start_time": { "type": "number" },
+                "end_time": { "type": "number" },
+                "params": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

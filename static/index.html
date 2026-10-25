@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IncuBrix — Prompt-Based Video Editing Engine</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo-mark">⚡</div>
+      <div class="brand-text">
+        <span class="brand-name">IncuBrix</span>
+        <span class="engine-badge" id="engineBadge">Local deterministic instruction engine</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="status-indicator">
+        <span class="status-dot active"></span>
+        <span id="backendStatus">Engine Ready</span>
+      </div>
+      <label class="btn btn-secondary upload-btn" id="uploadLabel">
+        <span>📁 Upload Video</span>
+        <input type="file" id="videoFileInput" style="display: none;">
+      </label>
+      <button class="btn btn-primary" id="renderBtn" disabled>
+        <span>🎬 Render Video</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Application Workspace -->
+  <main class="editor-workspace">
+    <!-- Left Column: Video Preview and Timeline -->
+    <section class="viewport-section">
+      <div class="player-container">
+        <video id="videoPlayer" controls playsinline></video>
+        <div class="video-overlay-caption" id="captionOverlay" style="display: none;"></div>
+        <div class="empty-player-state" id="emptyPlayerState">
+          <div class="empty-icon">🎥</div>
+          <h3>No Video Loaded</h3>
+          <p>Upload a video (MP4/MOV) to initialize your deterministic editing session.</p>
+        </div>
+      </div>
+
+      <!-- Timeline Bar and Metadata -->
+      <div class="timeline-container">
+        <div class="timeline-header">
+          <div class="timeline-title">
+            <span class="section-label">TIMELINE TRACKS</span>
+            <span class="timeline-meta" id="timelineMeta">0.00s | 0 segments</span>
+          </div>
+          <div class="timeline-controls">
+            <button class="btn-icon" id="undoBtn" title="Undo (Reverts 1 edit)" disabled>↩ Undo</button>
+            <button class="btn-icon" id="redoBtn" title="Redo edit" disabled>↪ Redo</button>
+            <button class="btn-icon" id="restoreIntroBtn" title="Restore Intro" disabled>↺ Restore Intro</button>
+          </div>
+        </div>
+        <div class="timeline-track" id="timelineTrack">
+          <!-- Dynamically populated segment blocks -->
+          <div class="empty-track-msg">Timeline is empty. Upload video to begin.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Natural Language Prompt Engine & Inspector -->
+    <aside class="sidebar-section">
+      <!-- Session and Media Info Widget -->
+      <div class="panel-card asset-panel">
+        <h4 class="card-title">Media Details & SHA-256</h4>
+        <div class="metadata-grid" id="metadataGrid">
+          <div class="meta-item"><span class="meta-k">Asset ID:</span> <span class="meta-v" id="metaAssetId">—</span></div>
+          <div class="meta-item"><span class="meta-k">Duration:</span> <span class="meta-v" id="metaDuration">—</span></div>
+          <div class="meta-item"><span class="meta-k">Resolution:</span> <span class="meta-v" id="metaResolution">—</span></div>
+          <div class="meta-item"><span class="meta-k">FPS / Codec:</span> <span class="meta-v" id="metaCodec">—</span></div>
+          <div class="meta-item full"><span class="meta-k">Source SHA-256:</span> <span class="meta-v mono" id="metaSha">—</span></div>
+          <div class="meta-item full"><span class="meta-k">Timeline Hash:</span> <span class="meta-v mono" id="metaTimelineHash">—</span></div>
+        </div>
+      </div>
+
+      <!-- Natural Language Prompt Engine -->
+      <div class="panel-card instruction-panel">
+        <h4 class="card-title">Natural-Language Instructions</h4>
+        
+        <!-- Sample prompts (pass through the identical pipeline) -->
+        <div class="sample-prompts-label">Sample Prompts (Unified Pipeline):</div>
+        <div class="sample-pills">
+          <button class="pill-btn" data-prompt="Cut the first 5 seconds.">✂ Cut first 5s</button>
+          <button class="pill-btn" data-prompt="Remove the last 3 seconds.">✂ Cut last 3s</button>
+          <button class="pill-btn" data-prompt="Speed up the whole video by 2x.">⏩ Speed 2x</button>
+          <button class="pill-btn" data-prompt="Slow down the video to half speed.">⏪ Slow 0.5x</button>
+          <button class="pill-btn" data-prompt="Move the last segment to the beginning.">⇄ Move last to start</button>
+          <button class="pill-btn" data-prompt="Add a caption saying Dance Practice at the beginning.">💬 Add Caption</button>
+          <button class="pill-btn" data-prompt="Change the caption color to red.">🎨 Caption Red</button>
+          <button class="pill-btn" data-prompt="Remove the pricing section.">❓ Ambiguous Section</button>
+        </div>
+
+        <form id="instructionForm" class="instruction-form">
+          <div class="input-wrapper">
+            <input type="text" id="instructionInput" placeholder="e.g. Cut the first 5 seconds or Set playback speed to 1.5x..." autocomplete="off">
+            <button type="submit" class="btn btn-send" id="sendBtn" disabled>Apply Edit</button>
+          </div>
+        </form>
+
+        <!-- Instruction Outcome Status Display -->
+        <div class="outcome-box" id="outcomeBox" style="display: none;">
+          <div class="outcome-header">
+            <span class="outcome-tag" id="outcomeTag">APPLIED</span>
+            <span class="outcome-time" id="outcomeTime">Just now</span>
+          </div>
+          <div class="outcome-message" id="outcomeMessage"></div>
+          
+          <!-- Interactive Clarification Choices (Persistent Resolution) -->
+          <div class="clarification-container" id="clarificationContainer" style="display: none;">
+            <p class="clarification-prompt" id="clarificationPrompt">Please select an occurrence:</p>
+            <div class="clarification-choices" id="clarificationChoices"></div>
+            <div class="clarification-custom">
+              <input type="text" id="clarificationInput" placeholder="Type e.g. 'Remove the second occurrence' or 'Remove all'...">
+              <button class="btn btn-sm btn-secondary" id="clarificationSubmitBtn">Submit Choice</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Render Job & Output Panel -->
+      <div class="panel-card render-panel" id="renderPanel" style="display: none;">
+        <h4 class="card-title">FFmpeg Render Pipeline</h4>
+        <div class="job-status-row">
+          <span class="job-status-label">Status:</span>
+          <span class="job-status-value" id="renderStatus">QUEUED</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="renderProgressBar" style="width: 0%;"></div>
+        </div>
+        <div class="render-details" id="renderDetails">Rendering canonical timeline through FFmpeg...</div>
+        
+        <div class="render-actions" id="renderActions" style="display: none;">
+          <a class="btn btn-primary" id="downloadRenderBtn" href="#" download>⬇ Download Rendered Video</a>
+          <button class="btn btn-secondary" id="previewRenderBtn">▶ Preview Rendered</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

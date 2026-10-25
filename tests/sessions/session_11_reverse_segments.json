@@ -1,0 +1,9 @@
+{
+  "id": "session_11_reverse_segments",
+  "title": "Reverse segment order",
+  "commands": [
+    "Cut from 10 to 15 seconds.",
+    "Reverse the order of these two segments."
+  ],
+  "expected_status": "APPLIED"
+}

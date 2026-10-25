@@ -1,0 +1,9 @@
+{
+  "id": "session_04_speed_up_whole",
+  "title": "Speed up whole video by 2x",
+  "commands": [
+    "Speed up the whole video by 2x."
+  ],
+  "expected_final_duration": 15.0,
+  "expected_status": "APPLIED"
+}
